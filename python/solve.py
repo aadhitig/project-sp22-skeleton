@@ -12,13 +12,64 @@ from typing import Callable, Dict
 from instance import Instance
 from solution import Solution
 from file_wrappers import StdinFileWrapper, StdoutFileWrapper
+from point import Point
 
 
 def solve_naive(instance: Instance) -> Solution:
-    return Solution(
-        instance=instance,
-        towers=instance.cities,
-    )
+    sols = []
+    if instance.grid_side_length == 30:
+        for x in range(0, 30, 6):
+            for y in range(0, 30, 6):
+                point = Point(x, y)
+                sols.append(point)
+        for x in range(3, 30, 6):
+            for y in range(3, 30, 6):
+                point = Point(x, y)
+                sols.append(point)
+        for y in range(0, 30, 6):
+            point = Point(29, y)
+            sols.append(point)
+        for x in range(0, 30, 6):
+            point = Point(x, 29)
+            sols.append(point)
+        sols.append(Point(29,29))
+        return Solution(
+            instance=instance,
+            towers=sols,
+        )
+    elif instance.grid_side_length == 50:
+        for x in range(0, 50, 6):
+            for y in range(0, 50, 6):
+                point = Point(x, y)
+                sols.append(point)
+        for x in range(3, 50, 6):
+            for y in range(3, 50, 6):
+                point = Point(x, y)
+                sols.append(point)
+        for y in range(0, 50, 6):
+            point = Point(49, y)
+            sols.append(point)
+        for x in range(0, 50, 6):
+            point = Point(x, 49)
+            sols.append(point)
+        sols.append(Point(49,49))
+        return Solution(
+            instance=instance,
+            towers=sols,
+        )
+    else:
+        for x in range(0, 100, 6):
+            for y in range(0, 100, 6):
+                point = Point(x, y)
+                sols.append(point)
+        for x in range(3, 100, 6):
+            for y in range(3, 100, 6):
+                point = Point(x, y)
+                sols.append(point)
+        return Solution(
+            instance=instance,
+            towers=sols,
+        )
 
 
 SOLVERS: Dict[str, Callable[[Instance], Solution]] = {
