@@ -17,6 +17,7 @@ from point import Point
 
 def solve_naive(instance: Instance) -> Solution:
     sols = []
+    r = 1
     if instance.grid_side_length == 30:
         for x in range(0, 30, 6):
             for y in range(0, 30, 6):
@@ -26,10 +27,10 @@ def solve_naive(instance: Instance) -> Solution:
             for y in range(3, 30, 6):
                 point = Point(x, y)
                 sols.append(point)
-        for y in range(0, 30, 6):
+        for y in range(0, 30, 3):
             point = Point(29, y)
             sols.append(point)
-        for x in range(0, 30, 6):
+        for x in range(0, 30, 3):
             point = Point(x, 29)
             sols.append(point)
         sols.append(Point(29,29))
