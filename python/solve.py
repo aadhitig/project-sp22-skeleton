@@ -14,63 +14,32 @@ from solution import Solution
 from file_wrappers import StdinFileWrapper, StdoutFileWrapper
 from point import Point
 
-
 def solve_naive(instance: Instance) -> Solution:
     sols = []
-    r = 1
-    if instance.grid_side_length == 30:
-        for x in range(0, 30, 6):
-            for y in range(0, 30, 6):
-                point = Point(x, y)
-                sols.append(point)
-        for x in range(3, 30, 6):
-            for y in range(3, 30, 6):
-                point = Point(x, y)
-                sols.append(point)
-        for y in range(0, 30, 3):
-            point = Point(29, y)
-            sols.append(point)
-        for x in range(0, 30, 3):
-            point = Point(x, 29)
-            sols.append(point)
-        sols.append(Point(29,29))
-        return Solution(
-            instance=instance,
-            towers=sols,
-        )
-    elif instance.grid_side_length == 50:
-        for x in range(0, 50, 6):
-            for y in range(0, 50, 6):
-                point = Point(x, y)
-                sols.append(point)
-        for x in range(3, 50, 6):
-            for y in range(3, 50, 6):
-                point = Point(x, y)
-                sols.append(point)
-        for y in range(0, 50, 6):
-            point = Point(49, y)
-            sols.append(point)
-        for x in range(0, 50, 6):
-            point = Point(x, 49)
-            sols.append(point)
-        sols.append(Point(49,49))
-        return Solution(
-            instance=instance,
-            towers=sols,
-        )
-    else:
-        for x in range(0, 100, 6):
-            for y in range(0, 100, 6):
-                point = Point(x, y)
-                sols.append(point)
-        for x in range(3, 100, 6):
-            for y in range(3, 100, 6):
-                point = Point(x, y)
-                sols.append(point)
-        return Solution(
-            instance=instance,
-            towers=sols,
-        )
+    dict_cities = {}
+    for city in instance.cities:
+        if city.x in dict_cities:
+            dict_cities[city.x].append(city.y)
+        else:
+            dict_cities[city.x] = [city.y]
+    
+    for x in range(0, instance.grid_side_length):
+        if x in dict_cities.keys():
+            y_coor = dict_cities[x]
+            for y in y_coor:
+                if not is_covered(sols, Point(x,y)):
+                    sols.append(Point(x, y))
+                
+    return Solution(
+        instance=instance,
+        towers=sols,
+    )
+
+def is_covered(towers, city):
+    for tower in towers:
+        if Point.distance_sq(tower, city) <= 9:
+            return True
+    return False
 
 
 SOLVERS: Dict[str, Callable[[Instance], Solution]] = {
