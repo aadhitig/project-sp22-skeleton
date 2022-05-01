@@ -13,6 +13,7 @@ from instance import Instance
 from solution import Solution
 from file_wrappers import StdinFileWrapper, StdoutFileWrapper
 from point import Point
+import math
 
 def solve_naive(instance: Instance) -> Solution:
     sols = []
@@ -25,11 +26,24 @@ def solve_naive(instance: Instance) -> Solution:
     
     for x in range(0, instance.grid_side_length):
         if x in dict_cities.keys():
-            y_coor = dict_cities[x]
-            for y in y_coor:
-                if not is_covered(sols, Point(x,y)):
-                    sols.append(Point(x, y))
-                
+            y_coor = sorted(dict_cities[x])
+            for y in range(len(y_coor)):
+                if not is_covered(sols, Point(x,y_coor[y])):
+                    for y2 in range(y + 1, len(y_coor)):
+                        if not is_covered(sols, Point(x,y_coor[y2])):
+                            mid_tower = addTowerMid(Point(x,y_coor[y]), Point(x,y_coor[y2]))
+                            if mid_tower is not None:
+                                sols.append(mid_tower)
+                                break
+                    if not is_covered(sols, Point(x,y_coor[y])):
+                        sols.append(Point(x, y_coor[y]))
+
+                    # if y < len(y_coor) - 1:
+                    #     mid_tower = addTowerMid(Point(x,y_coor[y]), Point(x,y_coor[y+1]))
+                    #     if mid_tower is not None:
+                    #         sols.append(mid_tower)
+                    #     else:
+                    #         sols.append(Point(x, y_coor[y]))
     return Solution(
         instance=instance,
         towers=sols,
@@ -41,6 +55,12 @@ def is_covered(towers, city):
             return True
     return False
 
+def addTowerMid(one, two):
+    dist_between_sq = Point.distance_sq(one, two)
+    if dist_between_sq <= 36:
+        dist_between = int(math.sqrt(dist_between_sq))
+        return Point(one.x, one.y + dist_between // 2)
+    return None
 
 SOLVERS: Dict[str, Callable[[Instance], Solution]] = {
     "naive": solve_naive
