@@ -1,1 +1,0 @@
-Run solve_all.py to run our algorithm!
