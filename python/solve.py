@@ -16,28 +16,39 @@ from file_wrappers import StdinFileWrapper, StdoutFileWrapper
 from point import Point
 
 def solve_naive(instance: Instance) -> Solution:
-    sols = [sol_bottom_left_x(instance), sol_bottom_left_y(instance), sol_top_right_x(instance), sol_top_right_y(instance)]
+    # sols = [sol_bottom_left_x(instance), sol_bottom_left_y(instance), sol_top_right_x(instance), sol_top_right_y(instance), greedy_solution(instance)]
 
-    solution_one = Solution(
-        instance=instance,
-        towers=sols[0],
-    )
-    solution_two = Solution(
-        instance=instance,
-        towers=sols[1],
-    )
-    solution_three = Solution(
-        instance=instance,
-        towers=sols[2],
-    )
+    # solution_one = Solution(
+    #     instance=instance,
+    #     towers=sols[0],
+    # )
+    # solution_two = Solution(
+    #     instance=instance,
+    #     towers=sols[1],
+    # )
+    # solution_three = Solution(
+    #     instance=instance,
+    #     towers=sols[2],
+    # )
 
-    solution_four = Solution(
-        instance=instance,
-        towers=sols[3],
-    )
+    # solution_four = Solution(
+    #     instance=instance,
+    #     towers=sols[3],
+    # )
+
+    # solution_five = Solution(
+    #     instance=instance,
+    #     towers = sols[4],
+    # )
     
-    return min(solution_one, solution_two, solution_three, solution_four , key = lambda k: k.penalty())
+    # return min(solution_one, solution_two, solution_three, solution_four , key = lambda k: k.penalty())
 
+    return Solution(
+        instance=instance,
+        towers = greedy_solution(instance),
+    )
+
+    
 def sol_bottom_left_x(instance):
     sols = []
     cities = instance.cities
@@ -99,6 +110,35 @@ def sol_top_right_y(instance):
             if not is_covered(sols, sorted_cities[c]):
                 sols.append(sorted_cities[c])
     return sols
+
+def greedy_solution(instance: Instance):
+    towers_covered = {}
+    sols = []
+    cities = instance.cities
+    for x in range(instance.grid_side_length):
+        for y in range(instance.grid_side_length):
+            towers = []
+            for x_add in range(4):
+                for y_add in range(4):
+                    for city in cities:
+                        if city.x == x + x_add and city.y == y + y_add:
+                            towers.append(city)
+            towers_covered[(x, y)] = towers
+
+    while cities is not []:
+        placed = max(towers_covered, key = lambda k : len(towers_covered.get(k)))
+        sols.append(Point(placed[0], placed[1]))
+        for i in towers_covered[placed]:
+            if i in cities:
+                cities.remove(i)
+        for key in towers_covered.keys():
+            curr = towers_covered[key]
+            for t in curr:
+                if t not in cities:
+                    curr.remove(t)
+            towers_covered[key] = curr
+    return sols
+            
 
 def is_covered(towers, city):
     for tower in towers:
