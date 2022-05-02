@@ -6,6 +6,7 @@ For usage, run `python3 solve.py --help`.
 """
 
 import argparse
+from cmath import inf
 from pathlib import Path
 from typing import Callable, Dict
 
@@ -13,41 +14,91 @@ from instance import Instance
 from solution import Solution
 from file_wrappers import StdinFileWrapper, StdoutFileWrapper
 from point import Point
-import math
 
 def solve_naive(instance: Instance) -> Solution:
-    sols = []
-    dict_cities = {}
-    for city in instance.cities:
-        if city.x in dict_cities:
-            dict_cities[city.x].append(city.y)
-        else:
-            dict_cities[city.x] = [city.y]
-    
-    for x in range(0, instance.grid_side_length):
-        if x in dict_cities.keys():
-            y_coor = sorted(dict_cities[x])
-            for y in range(len(y_coor)):
-                if not is_covered(sols, Point(x,y_coor[y])):
-                    for y2 in range(y + 1, len(y_coor)):
-                        if not is_covered(sols, Point(x,y_coor[y2])):
-                            mid_tower = addTowerMid(Point(x,y_coor[y]), Point(x,y_coor[y2]))
-                            if mid_tower is not None:
-                                sols.append(mid_tower)
-                                break
-                    if not is_covered(sols, Point(x,y_coor[y])):
-                        sols.append(Point(x, y_coor[y]))
+    sols = [sol_bottom_left_x(instance), sol_bottom_left_y(instance), sol_top_right_x(instance), sol_top_right_y(instance)]
 
-                    # if y < len(y_coor) - 1:
-                    #     mid_tower = addTowerMid(Point(x,y_coor[y]), Point(x,y_coor[y+1]))
-                    #     if mid_tower is not None:
-                    #         sols.append(mid_tower)
-                    #     else:
-                    #         sols.append(Point(x, y_coor[y]))
-    return Solution(
+    solution_one = Solution(
         instance=instance,
-        towers=sols,
+        towers=sols[0],
     )
+    solution_two = Solution(
+        instance=instance,
+        towers=sols[1],
+    )
+    solution_three = Solution(
+        instance=instance,
+        towers=sols[2],
+    )
+
+    solution_four = Solution(
+        instance=instance,
+        towers=sols[3],
+    )
+    
+    return min(solution_one, solution_two, solution_three, solution_four , key = lambda k: k.penalty())
+
+def sol_bottom_left_x(instance):
+    sols = []
+    cities = instance.cities
+    sorted_cities = sorted(cities , key=lambda k: k.x)
+    for c in range(len(sorted_cities)):
+        if not is_covered(sols, sorted_cities[c]):
+            for i in range(c + 1, len(sorted_cities)):
+                if not is_covered(sols, sorted_cities[i]) and Point.distance_sq(sorted_cities[c], sorted_cities[i]) <= 36:
+                    mid_tower = addTowerMid(sorted_cities[c], sorted_cities[i])
+                    sols.append(mid_tower)
+                    break
+            if not is_covered(sols, sorted_cities[c]):
+                sols.append(sorted_cities[c])
+    return sols
+
+def sol_bottom_left_y(instance):
+    sols = []
+    cities = instance.cities
+    sorted_cities = sorted(cities , key=lambda k: k.y)
+    for c in range(len(sorted_cities)):
+        if not is_covered(sols, sorted_cities[c]):
+            for i in range(c + 1, len(sorted_cities)):
+                if not is_covered(sols, sorted_cities[i]) and Point.distance_sq(sorted_cities[c], sorted_cities[i]) <= 36:
+                    mid_tower = addTowerMid(sorted_cities[c], sorted_cities[i])
+                    sols.append(mid_tower)
+                    break
+            if not is_covered(sols, sorted_cities[c]):
+                sols.append(sorted_cities[c])
+    return sols
+
+def sol_top_right_x(instance):
+    sols = []
+    cities = instance.cities
+    sorted_cities = sorted(cities , key=lambda k: k.x)
+    sorted_cities.reverse()
+    for c in range(len(sorted_cities)):
+        if not is_covered(sols, sorted_cities[c]):
+            for i in range(c + 1, len(sorted_cities)):
+                if not is_covered(sols, sorted_cities[i]) and Point.distance_sq(sorted_cities[c], sorted_cities[i]) <= 36:
+                    mid_tower = addTowerMid(sorted_cities[c], sorted_cities[i])
+                    sols.append(mid_tower)
+                    break
+            if not is_covered(sols, sorted_cities[c]):
+                sols.append(sorted_cities[c])
+    return sols
+
+def sol_top_right_y(instance):
+    sols = []
+    cities = instance.cities
+    sorted_cities = sorted(cities , key=lambda k: k.y)
+    sorted_cities.reverse()
+    for c in range(len(sorted_cities)):
+        if not is_covered(sols, sorted_cities[c]):
+            for i in range(c + 1, len(sorted_cities)):
+                if not is_covered(sols, sorted_cities[i]) and Point.distance_sq(sorted_cities[c], sorted_cities[i]) <= 36:
+                    mid_tower = addTowerMid(sorted_cities[c], sorted_cities[i])
+                    sols.append(mid_tower)
+                    break
+            if not is_covered(sols, sorted_cities[c]):
+                sols.append(sorted_cities[c])
+    return sols
 
 def is_covered(towers, city):
     for tower in towers:
@@ -56,18 +107,12 @@ def is_covered(towers, city):
     return False
 
 def addTowerMid(one, two):
-    dist_between_sq = Point.distance_sq(one, two)
-    if dist_between_sq <= 36:
-        dist_between = int(math.sqrt(dist_between_sq))
-        return Point(one.x, one.y + dist_between // 2)
-    return None
+    return Point((one.x + two.x) // 2 , (one.y + two.y) // 2)
 
 SOLVERS: Dict[str, Callable[[Instance], Solution]] = {
     "naive": solve_naive
 }
 
-
-# You shouldn't need to modify anything below this line.
 def infile(args):
     if args.input == "-":
         return StdinFileWrapper()
